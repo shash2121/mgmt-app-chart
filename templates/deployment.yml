@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.feapp.name }}
+  labels:
+    app: fe-app
+spec:
+  replicas: {{ .Values.feapp.replicaCount }}
+  selector:
+    matchLabels:
+      app: fe-app
+  template:
+    metadata:
+      labels:
+        app: fe-app
+    spec:
+      initContainers:
+        {{- toYaml .Values.feapp.initContainers | nindent 8 }}
+      containers:
+        - name: fe-app
+          image: "{{ .Values.feapp.image.repository }}:{{ .Values.feapp.image.tag }}"
+          imagePullPolicy: {{ .Values.feapp.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.feapp.service.port }}
