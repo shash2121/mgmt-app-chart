@@ -1,0 +1,36 @@
+feapp:
+  name: fe-app
+  replicaCount: 1
+
+  image:
+    repository: sha2121/fe-app
+    tag: 20
+    pullPolicy: IfNotPresent
+
+  service:
+    name: fe-app
+    type: LoadBalancer
+    port: 80
+    targetPort: 3000
+
+  initContainers:
+    - name: init-db
+      image: busybox:1.31
+      command:
+        - sh
+        - -c
+        - |
+          echo -e "Checking for the availability of MySQL Server deployment"; 
+          while ! nc -z mysql 3306; do sleep 1; printf "-"; done; 
+          echo -e "  >> MySQL DB Server has started";
+
+mysql:
+  replicaCount: 1
+  containerPort: 3306
+  image:
+    repository: mysql
+    tag: "5.6"
+  secretName: mysql-secret
+  rootPassword: U3Ryb25nUGFzc3dvcmQxMTE=
+  configMapName: fe-app-db-creation
+  databaseName: appdb
